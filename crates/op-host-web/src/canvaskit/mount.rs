@@ -60,6 +60,8 @@ pub(super) async fn mount_ck(canvas_id: String) -> Result<(), JsValue> {
     // never flashes in.
     let search = window.location().search().unwrap_or_default();
     host.editor_state_mut().editor_ui.embed = op_editor_core::EmbedHost::from_query(&search);
+    host.editor_state_mut().editor_ui.host_owns_chat =
+        crate::web_settings::host_owns_chat_from_query(&search);
     let credential_load = crate::web_settings::load_into(host.editor_state_mut());
     // Theme is device-level, so it is resolved from its own unpartitioned key
     // rather than from the partition blob just loaded. On a browser that has
