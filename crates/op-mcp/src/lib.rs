@@ -64,6 +64,9 @@ mod batch_program_update_tests;
 pub mod bulk_vars;
 #[cfg(test)]
 mod bulk_vars_tests;
+pub mod codegen_export_tool;
+#[cfg(test)]
+mod codegen_export_tool_tests;
 mod codegen_plan_store;
 pub mod codegen_tools;
 #[cfg(test)]
@@ -617,3 +620,5 @@ where
         writer.flush()?;
     }
 }
+
+pub use codegen_export_tool::{codegen_export_snapshot, codegen_export_targets, CodegenExport};

@@ -18,6 +18,7 @@ debug-tools = []
 script = ["dep:rquickjs", "dep:tracing"]
 
 [dependencies]
+op-codegen = { path = "../op-codegen" }
 jian-ops-schema = { path = "../../vendor/jian/crates/jian-ops-schema" }
 jian-scene = { path = "../../vendor/jian/crates/jian-scene" }
 op-ai-skills = { path = "../op-ai-skills" }

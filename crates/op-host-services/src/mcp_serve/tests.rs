@@ -109,6 +109,7 @@ fn tools_list_response_includes_all_registered_tools() {
         "get_component",
         "batch_get",
         "read_nodes",
+        "codegen_export",
         "codegen_plan",
         "codegen_submit_chunk",
         "codegen_assemble",
