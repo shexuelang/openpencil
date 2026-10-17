@@ -51,7 +51,13 @@ fn image_deck() -> EditorState {
 fn part_names(bytes: &[u8]) -> Vec<String> {
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(bytes.to_vec())).expect("valid zip");
     (0..zip.len())
-        .map(|i| zip.by_index(i).expect("entry").name().to_string())
+        .map(|i| {
+            zip.by_index(i)
+                .expect("entry")
+                .name()
+                .expect("name")
+                .into_owned()
+        })
         .collect()
 }
 

@@ -95,7 +95,7 @@ fn decompress_chunk(bytes: &[u8]) -> Vec<u8> {
 }
 
 fn zstd_decompress(bytes: &[u8]) -> Option<Vec<u8>> {
-    let mut decoder = ruzstd::StreamingDecoder::new(bytes).ok()?;
+    let mut decoder = ruzstd::decoding::StreamingDecoder::new(bytes).ok()?;
     let mut out = Vec::new();
     decoder
         .by_ref()

@@ -200,7 +200,10 @@ fn inspect_archive<R: Read + Seek>(
         let metadata = archive
             .by_index_raw(archive_index)
             .map_err(|error| HtmlProjectError::InvalidZip(error.to_string()))?;
-        let original_path = metadata.name().to_string();
+        let original_path = metadata
+            .name()
+            .map_err(|error| HtmlProjectError::InvalidZip(error.to_string()))?
+            .into_owned();
         let is_symlink = metadata.is_symlink();
         let is_dir = metadata.is_dir();
         let encrypted = metadata.encrypted();

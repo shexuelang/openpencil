@@ -60,6 +60,16 @@ ignore = [
   # zbus_xml bump their quick-xml requirement to >= 0.41.
   "RUSTSEC-2026-0194",
   "RUSTSEC-2026-0195",
+  # The only zip <9 edge is github-copilot-sdk 1.0.11's build dependency.
+  # Its downloader is disabled by COPILOT_SKIP_CLI_DOWNLOAD, and its ZIP
+  # reader uses by_index + io::copy, never ZipArchive/ZipStreamReader::extract
+  # or archive-supplied Unix permissions/symlink targets. The three advisories
+  # concern those unused filesystem extraction APIs. Product ZIP handling
+  # uses zip >=9; the wrapper ban below rejects any other old-ZIP consumer.
+  # Remove these exceptions when a stable SDK moves its build dependency to 9.
+  "RUSTSEC-2026-0367",
+  "RUSTSEC-2026-0368",
+  "RUSTSEC-2026-0369",
 ]
 
 [bans]
@@ -77,6 +87,8 @@ deny = [
   # tools/check-wasm-bundle.sh.
   "pen-agent-cli",
   "pen-server",
+  { crate = "zip:<9", wrappers = ["github-copilot-sdk"],
+    reason = "build-only SDK ZIP reader does not use the affected filesystem extraction APIs" },
   # github-copilot-sdk 1.0.11 currently enables native-tls unconditionally
   # for its build downloader plus HTTP/WebSocket handler transports. Permit
   # exactly the audited version and direct wrapper set; all other versions
