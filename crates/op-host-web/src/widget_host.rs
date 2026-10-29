@@ -361,6 +361,10 @@ pub struct WidgetHost {
     /// Whether Alt/Option is currently held. Node dragging uses this
     /// to duplicate the current selection before moving it.
     pub(in crate::widget_host) alt_held: bool,
+    /// Whether Cmd (macOS) or Ctrl (Windows/Linux) is currently held.
+    /// Canvas clicks use this for deep selection (bypass one-level drill
+    /// and select the deepest node directly, Figma parity).
+    pub(in crate::widget_host) deep_select_held: bool,
     /// Host clock in ms — set by `lib.rs` on each event from
     /// `performance.now()`. Used for double-click detection.
     pub(in crate::widget_host) now_ms: u64,

@@ -54,6 +54,7 @@ impl WidgetHostNative {
             &hit_path,
             self.now_ms,
             self.shift_held,
+            self.deep_select_held,
         ) else {
             return false;
         };
@@ -106,10 +107,19 @@ impl WidgetHostNative {
         }
         let should_start_drag = core_drag::apply_canvas_press_selection(
             &mut self.editor_state,
-            resolved.primary,
+            resolved.primary.clone(),
             self.shift_held,
             &hit_path,
         );
+        // Deep-select (Cmd/Ctrl) enters the parent scope so the next click
+        // drills from that level, not from the implicit root (Figma parity).
+        if self.deep_select_held && !self.shift_held {
+            core_drag::enter_parent_scope_after_deep_select(
+                &mut self.editor_state,
+                &resolved.primary,
+            );
+            self.last_hover_probe = None;
+        }
         self.scroll_layer_panel_selection_into_view(viewport_width, viewport_height);
         if should_start_drag {
             self.start_node_drag(x, y);

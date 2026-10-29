@@ -54,6 +54,7 @@ impl WidgetHost {
             collab_id_allocator: None,
             shift_held: false,
             alt_held: false,
+            deep_select_held: false,
             now_ms: 0,
             wall_now_secs: 0,
             toast_rect: None,
@@ -154,6 +155,10 @@ impl WidgetHost {
 
     pub fn set_modifier_alt(&mut self, held: bool) {
         self.alt_held = held;
+    }
+
+    pub fn set_modifier_deep_select(&mut self, held: bool) {
+        self.deep_select_held = held;
     }
 
     pub fn set_space_pan(&mut self, held: bool) {

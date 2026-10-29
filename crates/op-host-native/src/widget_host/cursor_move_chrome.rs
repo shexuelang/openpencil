@@ -244,6 +244,7 @@ impl WidgetHostNative {
                 &self.layout_scene,
                 canvas_rect,
                 Point2D::new(x, y),
+                self.deep_select_held,
             )
         } else {
             self.last_hover_probe = None;

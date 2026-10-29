@@ -76,6 +76,7 @@ impl WidgetHostNative {
             last_gesture_was_zoom: false,
             shift_held: false,
             alt_held: false,
+            deep_select_held: false,
             toast_rect: None,
             last_viewport_w: 0.0,
             last_viewport_h: 0.0,
@@ -184,6 +185,16 @@ impl WidgetHostNative {
 
     pub fn set_modifier_alt(&mut self, held: bool) {
         self.alt_held = held;
+    }
+
+    /// Push the deep-select modifier (Cmd on macOS, Ctrl elsewhere).
+    /// A change drops the 3 px hover-probe cache so the next cursor move
+    /// re-resolves the hover outline at the new depth.
+    pub fn set_modifier_deep_select(&mut self, held: bool) {
+        if self.deep_select_held != held {
+            self.last_hover_probe = None;
+        }
+        self.deep_select_held = held;
     }
 
     /// Publish the geometry used by this frame before any focused surface
