@@ -748,6 +748,7 @@ impl WidgetHost {
                 &self.layout_scene,
                 canvas_rect,
                 Point2D::new(x, y),
+                self.deep_select_held,
             )
         } else {
             None

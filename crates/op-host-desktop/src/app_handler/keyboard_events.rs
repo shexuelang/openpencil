@@ -43,11 +43,17 @@ impl DesktopApp {
         self.zoom_modifier = state.super_key() || state.control_key();
         self.shift_modifier = state.shift_key();
         self.alt_modifier = state.alt_key();
-        // Forward shift state into the host so the next
-        // mouse press can branch on shift+click for
-        // multi-select.
+        // Forward modifier state into the host so the next
+        // mouse press can branch on shift+click for multi-select,
+        // alt+drag for duplicate, and cmd/ctrl+click for deep select.
         self.host.set_modifier_shift(self.shift_modifier);
         self.host.set_modifier_alt(self.alt_modifier);
+        // Deep select: macOS uses Cmd (super_key), Windows/Linux use Ctrl.
+        #[cfg(target_os = "macos")]
+        let deep_select = state.super_key();
+        #[cfg(not(target_os = "macos"))]
+        let deep_select = state.control_key();
+        self.host.set_modifier_deep_select(deep_select);
     }
 
     pub(super) fn on_space_released(&mut self) {

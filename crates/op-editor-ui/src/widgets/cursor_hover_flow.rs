@@ -261,11 +261,16 @@ pub fn code_panel_hover(
 ///
 /// Reads the CURRENT layout scene without refreshing it — hover must
 /// never rebuild a stale scene (same discipline as layer-row hover).
+///
+/// `deep_select_held` (Cmd on macOS, Ctrl elsewhere) previews the
+/// deepest node under the pointer — exactly what a deep-select click
+/// would pick.
 pub fn canvas_hover_target(
     state: &EditorState,
     scene: &LayoutScene,
     canvas_rect: Rect,
     point: Point2D,
+    deep_select_held: bool,
 ) -> Option<NodeId> {
     let canvas = CanvasViewport::from_editor(state, scene);
     if let Some(root) = canvas.frame_label_at_point(canvas_rect, point) {
@@ -280,6 +285,9 @@ pub fn canvas_hover_target(
         .node_path_at_doc_point(doc, state.viewport.zoom)
         .and_then(|path| {
             let path = path.into_iter().map(NodeId::new).collect::<Vec<_>>();
+            if deep_select_held {
+                return path.last().cloned();
+            }
             op_editor_core::selection_resolve::resolve_canvas_depth_targets(
                 &path,
                 state.editor_ui.entered_container.as_ref(),

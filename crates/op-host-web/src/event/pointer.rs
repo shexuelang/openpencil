@@ -59,6 +59,25 @@ pub fn classify_mouse_press_button(button: i16) -> MousePressAction {
     }
 }
 
+/// Whether a browser `navigator.platform` / `userAgent` string names
+/// an Apple platform. Decides the deep-select modifier: Cmd (meta) on
+/// macOS / iPadOS, Ctrl everywhere else.
+pub fn platform_is_apple(platform: &str) -> bool {
+    let p = platform.to_ascii_lowercase();
+    p.contains("mac") || p.contains("iphone") || p.contains("ipad")
+}
+
+/// Deep-select (Cmd/Ctrl+click) modifier state for one mouse event.
+/// macOS only honours Cmd — Ctrl+click there is the system secondary
+/// click — while Windows / Linux use Ctrl.
+pub fn deep_select_modifier(is_apple: bool, meta_key: bool, ctrl_key: bool) -> bool {
+    if is_apple {
+        meta_key
+    } else {
+        ctrl_key
+    }
+}
+
 /// Convert a browser event's canvas-local offset into the logical
 /// coordinate space the Rust widget host uses.
 ///

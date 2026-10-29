@@ -318,6 +318,15 @@ pub(super) async fn mount_ck(canvas_id: String) -> Result<(), JsValue> {
     let mut listeners: Vec<Listener> = Vec::new();
     let canvas_target: web_sys::EventTarget = canvas.clone().into();
     let win_target: web_sys::EventTarget = window.clone().into();
+    // Deep-select modifier: Cmd on Apple platforms, Ctrl elsewhere. The
+    // platform cannot change mid-session, so resolve it once at mount.
+    let is_apple = {
+        let nav = window.navigator();
+        let platform = nav.platform().unwrap_or_default();
+        let ua = nav.user_agent().unwrap_or_default();
+        crate::event::pointer::platform_is_apple(&platform)
+            || crate::event::pointer::platform_is_apple(&ua)
+    };
 
     // Accessibility DOM mirror (#57): delegated `focus` / `click` on the
     // hidden mirror container map a focused/activated mirror node back to a
@@ -377,6 +386,12 @@ pub(super) async fn mount_ck(canvas_id: String) -> Result<(), JsValue> {
                 };
                 b.host.set_modifier_shift(evt.shift_key());
                 b.host.set_modifier_alt(evt.alt_key());
+                b.host
+                    .set_modifier_deep_select(crate::event::pointer::deep_select_modifier(
+                        is_apple,
+                        evt.meta_key(),
+                        evt.ctrl_key(),
+                    ));
                 b.host.set_clocks(now_ms_perf(), now_unix_secs());
                 let (w, h) = b.backend.logical_size();
                 let (x, y) =
@@ -441,6 +456,12 @@ pub(super) async fn mount_ck(canvas_id: String) -> Result<(), JsValue> {
                     };
                     b.host.set_modifier_shift(evt.shift_key());
                     b.host.set_modifier_alt(evt.alt_key());
+                    b.host
+                        .set_modifier_deep_select(crate::event::pointer::deep_select_modifier(
+                            is_apple,
+                            evt.meta_key(),
+                            evt.ctrl_key(),
+                        ));
                     b.host.set_clocks(now_ms_perf(), now_unix_secs());
                     let (x, y) =
                         b.event_offset_to_logical(evt.offset_x() as f32, evt.offset_y() as f32);
@@ -473,6 +494,12 @@ pub(super) async fn mount_ck(canvas_id: String) -> Result<(), JsValue> {
             };
             b.host.set_modifier_shift(evt.shift_key());
             b.host.set_modifier_alt(evt.alt_key());
+            b.host
+                .set_modifier_deep_select(crate::event::pointer::deep_select_modifier(
+                    is_apple,
+                    evt.meta_key(),
+                    evt.ctrl_key(),
+                ));
             b.host.set_clocks(now_ms_perf(), now_unix_secs());
             let (w, h) = b.backend.logical_size();
             let was_middle = evt.button() == 1;

@@ -37,22 +37,31 @@ pub struct CanvasPressResolve {
 /// Shift and an existing multi-selection deliberately disable
 /// drill-down so a set-edit gesture cannot unexpectedly enter a
 /// container.
+///
+/// `deep_select_held` (Cmd on macOS, Ctrl elsewhere) bypasses the
+/// level-by-level drill: it selects the deepest node directly and
+/// enters its parent as the sibling scope (Figma parity).
 pub fn resolve_canvas_press(
     state: &mut EditorState,
     hit_path: &[NodeId],
     now_ms: u64,
     shift_held: bool,
+    deep_select_held: bool,
 ) -> Option<CanvasPressResolve> {
     let deepest = hit_path.last()?.clone();
     let targets =
         resolve_canvas_depth_targets(hit_path, state.editor_ui.entered_container.as_ref())?;
-    let is_double = matches!(
-        &state.editor_ui.last_canvas_click,
-        Some((prev, t)) if *prev == deepest
-            && now_ms.saturating_sub(*t) < CANVAS_DOUBLE_CLICK_MS
-    ) && !shift_held
+    // Deep-select skips double-click tracking so Cmd+click never drills
+    // a second level — it always picks the deepest geometry.
+    let is_double = !deep_select_held
+        && matches!(
+            &state.editor_ui.last_canvas_click,
+            Some((prev, t)) if *prev == deepest
+                && now_ms.saturating_sub(*t) < CANVAS_DOUBLE_CLICK_MS
+        )
+        && !shift_held
         && state.selection_count() <= 1;
-    state.editor_ui.last_canvas_click = if shift_held || is_double {
+    state.editor_ui.last_canvas_click = if shift_held || is_double || deep_select_held {
         None
     } else {
         Some((deepest.clone(), now_ms))
@@ -65,7 +74,10 @@ pub fn resolve_canvas_press(
     let selected_crop_is_deepest = deepest == state.selection.anchor
         && state.selection_count() == 1
         && state.can_edit_selected_image_crop();
-    let primary = if selected_crop_is_deepest {
+    let primary = if deep_select_held {
+        // Cmd/Ctrl bypass: select the deepest node directly.
+        deepest
+    } else if selected_crop_is_deepest {
         deepest
     } else {
         targets.primary.clone()
@@ -144,6 +156,18 @@ pub fn apply_canvas_press_selection(
         state.editor_ui.entered_container = None;
     }
     should_start_drag
+}
+
+/// Enter the parent of the selected node as the current sibling scope
+/// after a deep-select (Cmd/Ctrl+click) press. The deepest node is
+/// already selected; this sets `entered_container` to its parent so
+/// subsequent clicks and double-clicks drill from that level (Figma
+/// parity).
+pub fn enter_parent_scope_after_deep_select(state: &mut EditorState, selected: &NodeId) {
+    let parent = crate::walkers::find_parent_and_index(state.active_children(), selected)
+        .and_then(|(parent, _)| parent);
+    state.editor_ui.entered_container = parent;
+    state.editor_ui.canvas_hover_node = Some(selected.clone());
 }
 
 /// Outcome of the first cursor move that promotes a press into a drag.

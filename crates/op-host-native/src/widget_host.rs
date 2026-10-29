@@ -49,6 +49,8 @@ mod blur_inputs;
 mod blur_inputs_tests;
 mod boolean_op;
 #[cfg(test)]
+mod canvas_deep_select_tests;
+#[cfg(test)]
 mod canvas_drag_transition_tests;
 mod canvas_pan_cache;
 mod canvas_scene_patch;
@@ -501,6 +503,10 @@ pub struct WidgetHostNative {
     /// Whether Alt/Option is currently held. Node dragging uses this
     /// to duplicate the current selection before moving it.
     pub(in crate::widget_host) alt_held: bool,
+    /// Whether Cmd (macOS) or Ctrl (Windows/Linux) is currently held.
+    /// Canvas clicks use this for deep selection (bypass one-level drill
+    /// and select the deepest node directly, Figma parity).
+    pub(in crate::widget_host) deep_select_held: bool,
     /// Last viewport size seen by paint/press. Used by handlers
     /// that don't receive viewport dims (e.g. apply_cursor_move
     /// driving the color-picker drag).
